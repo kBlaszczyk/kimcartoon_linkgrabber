@@ -1,0 +1,22 @@
+group 'de.berlin.htw.blaszczyk.selenium'
+version '1.0-SNAPSHOT'
+
+apply plugin: 'java'
+apply plugin: 'idea'
+
+sourceCompatibility = 1.8
+targetCompatibility = 1.8
+
+repositories {
+    mavenCentral()
+}
+
+dependencies {
+
+    compile (
+            'org.seleniumhq.selenium:selenium-htmlunit-driver:+',
+            'org.seleniumhq.selenium:selenium-java:+',
+    )
+
+    testCompile group: 'junit', name: 'junit', version: '4.11'
+}
