@@ -1,5 +1,9 @@
+import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.firefox.FirefoxDriver;
+import org.openqa.selenium.support.ui.ExpectedCondition;
+import org.openqa.selenium.support.ui.ExpectedConditions;
+import org.openqa.selenium.support.ui.WebDriverWait;
 import pages.CartoonPage;
 import pages.EpisodePage;
 
@@ -7,20 +11,20 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.List;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
 /**
  * Created by kevin on 06.05.16.
  */
 public class Main {
 	public static void main(String[] args) {
-		String cartoon = "";
 		if (args.length > 0) {
-			cartoon = args[0];
+			String cartoon = args[0];
 			getEpisodeLinks(cartoon);
 		} else {
 			printHelp();
 		}
-
 	}
 
 	private static void getEpisodeLinks(String cartoon) {
@@ -35,10 +39,17 @@ public class Main {
 		FileWriter fileWriter = createFileWriter(cartoonTitle + ".txt");
 		try {
 			writeFileHeader(fileWriter, cartoonTitle);
+
 			for (EpisodePage episode : episodes) {
 				episode.open();
 				fileWriter.write(episode.getVideoLink());
 			}
+
+			//for (int i = 0; i < 4; i++) {
+				//episodes.get(i).open();
+				//fileWriter.write(episodes.get(i).getVideoLink() + "\n");
+			//}
+
 			fileWriter.close();
 		} catch (IOException ex) {
 			ex.printStackTrace();
@@ -61,7 +72,7 @@ public class Main {
 	}
 
 	private static void writeFileHeader(FileWriter fileWriter, String cartoonTitle) throws IOException {
-		fileWriter.write("\n\n" + cartoonTitle);
+		fileWriter.write("\n\n" + cartoonTitle + "\n");
 		fileWriter.write("==========================================");
 		fileWriter.write("\n\n");
 	}
