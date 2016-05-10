@@ -13,8 +13,13 @@ import java.util.concurrent.TimeUnit;
  * Created by kevin on 06.05.16.
  */
 public class Main {
+	private static boolean testmode = false;
+
 	public static void main(String[] args) {
 		if (args.length > 0) {
+			if (args.length == 2)
+				testmode = args[1].equals("test");
+
 			String cartoon = args[0];
 			getEpisodeLinks(cartoon);
 		} else {
@@ -25,6 +30,7 @@ public class Main {
 	private static void getEpisodeLinks(String cartoon) {
 		FirefoxProfile profile = new FirefoxProfile();
 		profile.setPreference("media.autoplay.enabled", false);
+		profile.setPreference("webdriver.load.strategy", "unstable");
 
 		WebDriver webDriver = new FirefoxDriver(profile);
 		webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
@@ -38,14 +44,16 @@ public class Main {
 		try {
 			writeFileHeader(fileWriter, cartoonTitle);
 
-			//for (EpisodePage episode : episodes) {
-				//episode.open();
-				//fileWriter.write(episode.getVideoLink());
-			//}
-
-			for (int i = 0; i < 3; i++) {
-				episodes.get(i).open();
-				fileWriter.write(episodes.get(i).getVideoLink() + "\n");
+			if (testmode) {
+				for (int i = 0; i < 3; i++) {
+					episodes.get(i).open();
+					fileWriter.write(episodes.get(i).getVideoLink() + "\n");
+				}
+			} else {
+				for (EpisodePage episode : episodes) {
+					episode.open();
+					fileWriter.write(episode.getVideoLink());
+				}
 			}
 
 			fileWriter.close();

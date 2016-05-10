@@ -21,9 +21,16 @@ public class EpisodePage extends Page {
 
 	public String getVideoLink() {
 		//long timestamp = System.nanoTime();
-		getDriver().findElement(byVideoLink).sendKeys(Keys.RETURN);
-		//(new WebDriverWait(getDriver(), 1)).until(ExpectedConditions.elementToBeClickable(byVideoLink)).click();
-		(new WebDriverWait(getDriver(), 10)).until(ExpectedConditions.presenceOfElementLocated(byVideo));
+
+		//getDriver().findElement(byVideoLink).sendKeys(Keys.RETURN);
+		(new WebDriverWait(getDriver(), 5)).until(ExpectedConditions.elementToBeClickable(byVideoLink)).sendKeys(Keys.RETURN);
+
+		//could possibly be used to skip the page loading
+		//IJavaScriptExecutor js = (IJavaScriptExecutor)Driver;
+		//js.ExecuteScript("return window.stop");
+
+		//(new WebDriverWait(getDriver(), 5)).until(ExpectedConditions.presenceOfElementLocated(byVideo));
+		(new WebDriverWait(getDriver(), 5)).until(ExpectedConditions.urlContains("googlevideo.com"));
 
 		//long elapsedTime = System.nanoTime() - timestamp;
 		//System.out.println("elapsed time: " + (float)elapsedTime / 1000000.0f);
