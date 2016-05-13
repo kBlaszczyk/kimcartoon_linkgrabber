@@ -1,4 +1,7 @@
+import exceptions.PossibleCaptcherException;
+import exceptions.SeleniumException;
 import org.openqa.selenium.WebDriver;
+import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.firefox.FirefoxDriver;
 import org.openqa.selenium.firefox.FirefoxProfile;
 import pages.CartoonPage;
@@ -51,13 +54,24 @@ public class Main {
 				}
 			} else {
 				for (EpisodePage episode : episodes) {
-					episode.open();
-					fileWriter.write(episode.getVideoLink());
+					boolean linkGrabbed = false;
+					while (!linkGrabbed) {
+						episode.open();
+
+						try {
+							fileWriter.write(episode.getVideoLink());
+							linkGrabbed = true;
+						} catch (PossibleCaptcherException ex) {
+							waitForEnter();
+						}
+					}
 				}
 			}
 
 			fileWriter.close();
 		} catch (IOException ex) {
+			ex.printStackTrace();
+		} catch (WebDriverException ex) {
 			ex.printStackTrace();
 		} finally {
 			webDriver.close();
@@ -85,5 +99,9 @@ public class Main {
 
 	private static void printHelp() {
 		System.out.println("cartoon namen als erstes argument übergeben!");
+	}
+
+	private static void waitForEnter() throws IOException {
+		System.in.read();
 	}
 }
