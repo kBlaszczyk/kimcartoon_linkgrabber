@@ -1,5 +1,4 @@
-import exceptions.PossibleCaptcherException;
-import exceptions.SeleniumException;
+import exceptions.PossibleCaptchaException;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.firefox.FirefoxDriver;
@@ -20,8 +19,10 @@ public class Main {
 
 	public static void main(String[] args) {
 		if (args.length > 0) {
-			if (args.length == 2)
+			if (args.length == 2) {
 				testmode = args[1].equals("test");
+				System.out.println("--- testmode ---");
+			}
 
 			String cartoon = args[0];
 			getEpisodeLinks(cartoon);
@@ -48,7 +49,7 @@ public class Main {
 			writeFileHeader(fileWriter, cartoonTitle);
 
 			if (testmode) {
-				for (int i = 0; i < 3; i++) {
+				for (int i = 0; i < 2; i++) {
 					episodes.get(i).open();
 					fileWriter.write(episodes.get(i).getVideoLink() + "\n");
 				}
@@ -59,9 +60,9 @@ public class Main {
 						episode.open();
 
 						try {
-							fileWriter.write(episode.getVideoLink());
+							fileWriter.write(episode.getVideoLink() + "\n");
 							linkGrabbed = true;
-						} catch (PossibleCaptcherException ex) {
+						} catch (PossibleCaptchaException ex) {
 							waitForEnter();
 						}
 					}
@@ -82,7 +83,7 @@ public class Main {
 		FileWriter fileWriter;
 
 		try {
-			fileWriter = new FileWriter(filename, true);
+			fileWriter = new FileWriter(filename);
 		} catch (IOException ex) {
 			ex.printStackTrace();
 			throw new IllegalArgumentException("could not open file: " + filename);
@@ -102,6 +103,7 @@ public class Main {
 	}
 
 	private static void waitForEnter() throws IOException {
+		System.out.println("waiting for enter");
 		System.in.read();
 	}
 }
