@@ -1,4 +1,4 @@
-package pages;
+package de.orchound.selenium.pages;
 
 import org.openqa.selenium.WebDriver;
 
@@ -7,11 +7,11 @@ import org.openqa.selenium.WebDriver;
  */
 public class Page {
 	private WebDriver webDriver;
-	private String url = "http://kisscartoon.me/";
+	private String url = "https://kimcartoon.to/";
 
-	public Page(WebDriver webDriver, String url) {
+	public Page(WebDriver webDriver, String subUrl) {
 		this.webDriver = webDriver;
-		this.url = this.url + url;
+		this.url = this.url + subUrl;
 	}
 
 	public WebDriver getDriver() {

@@ -1,10 +1,11 @@
-import exceptions.PossibleCaptchaException;
+package de.orchound.selenium;
+
+import de.orchound.selenium.exceptions.PossibleCaptchaException;
+import de.orchound.selenium.pages.CartoonPage;
+import de.orchound.selenium.pages.EpisodePage;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.firefox.FirefoxDriver;
-import org.openqa.selenium.firefox.FirefoxProfile;
-import pages.CartoonPage;
-import pages.EpisodePage;
 
 import java.io.FileWriter;
 import java.io.IOException;
@@ -32,11 +33,7 @@ public class Main {
 	}
 
 	private static void getEpisodeLinks(String cartoon) {
-		FirefoxProfile profile = new FirefoxProfile();
-		profile.setPreference("media.autoplay.enabled", false);
-		profile.setPreference("webdriver.load.strategy", "unstable");
-
-		WebDriver webDriver = new FirefoxDriver(profile);
+		WebDriver webDriver = new FirefoxDriver();
 		webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
 		CartoonPage cartoonPage = new CartoonPage(webDriver, cartoon);
@@ -46,8 +43,6 @@ public class Main {
 		String cartoonTitle = cartoonPage.getTitle();
 		FileWriter fileWriter = createFileWriter(cartoonTitle + ".txt");
 		try {
-			writeFileHeader(fileWriter, cartoonTitle);
-
 			if (testmode) {
 				for (int i = 0; i < 2; i++) {
 					episodes.get(i).open();
@@ -70,9 +65,7 @@ public class Main {
 			}
 
 			fileWriter.close();
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		} catch (WebDriverException ex) {
+		} catch (IOException | WebDriverException ex) {
 			ex.printStackTrace();
 		} finally {
 			webDriver.close();
@@ -90,12 +83,6 @@ public class Main {
 		}
 
 		return fileWriter;
-	}
-
-	private static void writeFileHeader(FileWriter fileWriter, String cartoonTitle) throws IOException {
-		fileWriter.write("\n\n" + cartoonTitle + "\n");
-		fileWriter.write("==========================================");
-		fileWriter.write("\n\n");
 	}
 
 	private static void printHelp() {

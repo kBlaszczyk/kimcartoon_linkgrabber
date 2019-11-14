@@ -1,14 +1,10 @@
-package pages;
+package de.orchound.selenium.pages;
 
 import org.openqa.selenium.By;
 import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebElement;
 
-import java.io.BufferedReader;
-import java.io.StringReader;
-import java.util.ArrayList;
 import java.util.List;
-import java.util.Scanner;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
 import java.util.stream.Collectors;
@@ -23,8 +19,11 @@ public class CartoonPage extends Page {
 	private By byEpisodeListing = By.cssSelector("table.listing");
 	private By byEpisodeLinks = By.cssSelector("a[href^='/Cartoon/']");
 
+	private String title;
+
 	public CartoonPage(WebDriver webDriver, String cartoon) {
 		super(webDriver, baseUrl + cartoon);
+		title = cartoon;
 	}
 
 	public List<EpisodePage> getEpisodes() {
@@ -36,15 +35,11 @@ public class CartoonPage extends Page {
 
 	@Override
 	public String getTitle() {
-		Matcher matcher = Pattern.compile("^(.*) cartoon \\|").matcher(super.getTitle());
-		if (matcher.find())
-			return matcher.group(1);
-		else
-			return "UNKNOWN NAME";
+		return title;
 	}
 
 	private EpisodePage initEpisodeFromWebElemenrt(WebElement webElement) {
-		Pattern pattern = Pattern.compile("http://kisscartoon\\.me/(.*)");
+		Pattern pattern = Pattern.compile("https://kimcartoon.to/(.*)");
 
 		Matcher subUrlMatcher = pattern.matcher(webElement.getAttribute("href"));
 		if (subUrlMatcher.find())

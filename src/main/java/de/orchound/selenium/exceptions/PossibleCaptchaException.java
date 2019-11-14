@@ -1,4 +1,4 @@
-package exceptions;
+package de.orchound.selenium.exceptions;
 
 /**
  * Created by kevin on 13.05.16.
