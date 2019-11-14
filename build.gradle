@@ -1,31 +1,88 @@
-group 'de.berlin.htw.blaszczyk.selenium'
-version '1.0-SNAPSHOT'
-
-apply plugin: 'java'
-apply plugin: 'idea'
+plugins {
+    id "application"
+    id "idea"
+}
 
 sourceCompatibility = 1.8
 targetCompatibility = 1.8
+
+group "de.orchound.selenium"
+version "1.0-SNAPSHOT"
+
+println """
+	|- $project.title -
+    |$description
+    |
+	|Group: $group
+    |Version: $version
+    |Vendor: $project.vendor
+	|
+	|Gradle version: $gradle.gradleVersion
+	|Gradle home: $gradle.gradleHomeDir
+	|Gradle user directory: $gradle.gradleUserHomeDir
+	|Running script: ${relativePath(buildFile)}
+""".stripMargin()
+
+mainClassName = project.main_class
+
+// -------------------------------------------------------------
+// --- Repositories and Dependencies ---------------------------
+// -------------------------------------------------------------
 
 repositories {
     mavenCentral()
 }
 
 dependencies {
-    compile (
-            'org.seleniumhq.selenium:selenium-htmlunit-driver:+',
-            'org.seleniumhq.selenium:selenium-java:+',
+    implementation (
+        "org.seleniumhq.selenium:selenium-java:3.141.59",
+        "org.seleniumhq.selenium:selenium-firefox-driver:3.141.59",
     )
-
-    testCompile group: 'junit', name: 'junit', version: '4.11'
 }
+
+// -------------------------------------------------------------
+// --- Tasks ---------------------------------------------------
+// -------------------------------------------------------------
 
 jar {
     manifest {
-        attributes 'Main-Class': 'Main'
+        attributes "Main-Class": project.main_class
+    }
+}
+
+task fatJar(type: Jar) {
+    setArchivesBaseName("$project.name-fat")
+
+    manifest {
+        attributes "Main-Class": project.main_class
     }
 
     from {
-        configurations.compile.collect { it.isDirectory() ? it : zipTree(it) }
+        configurations.runtimeClasspath.collect {
+            it.isDirectory() ? it : zipTree(it)
+        }
+    }
+
+    with jar
+
+    configure {
+        group = "build"
+        description = "Create an executable jar."
+    }
+}
+
+wrapper {
+    gradleVersion = "5.6.2"
+    distributionType = Wrapper.DistributionType.ALL
+}
+
+idea {
+    module {
+        jdkName = '1.8'
+
+        downloadJavadoc = true
+        downloadSources = true
+
+        iml {}
     }
 }
