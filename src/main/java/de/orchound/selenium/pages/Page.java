@@ -6,12 +6,13 @@ import org.openqa.selenium.WebDriver;
  * Created by kevin on 06.05.16.
  */
 public class Page {
-	private WebDriver webDriver;
-	private String url = "https://kimcartoon.to/";
 
-	public Page(WebDriver webDriver, String subUrl) {
+	protected WebDriver webDriver;
+	protected String url;
+
+	public Page(WebDriver webDriver, String url) {
 		this.webDriver = webDriver;
-		this.url = this.url + subUrl;
+		this.url = url;
 	}
 
 	public WebDriver getDriver() {
@@ -19,7 +20,7 @@ public class Page {
 	}
 
 	public String getUrl() {
-		return webDriver.getCurrentUrl();
+		return url;
 	}
 
 	public void open() {
