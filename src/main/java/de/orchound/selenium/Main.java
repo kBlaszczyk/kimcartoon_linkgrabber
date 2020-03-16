@@ -36,7 +36,7 @@ public class Main {
 			Arrays.asList(args).subList(0, args.length - 1)
 		);
 
-		if (options.containsKey("help")) {
+		if (options.containsKey("help") || args[args.length - 1].startsWith("-")) {
 			printHelp();
 		} else {
 			cartoon = args[args.length - 1];
