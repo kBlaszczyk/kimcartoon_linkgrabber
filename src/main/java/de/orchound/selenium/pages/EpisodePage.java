@@ -93,7 +93,9 @@ public class EpisodePage extends Page {
 			String filenameParam = "filename=%s";
 			String baseUrl = matcher.group(1);
 			String arguments = matcher.group(2);
-			newUrl = baseUrl + "?" + String.format(filenameParam, episodeName) + "&" + arguments;
+			newUrl = baseUrl + "?" + String.format(
+				filenameParam, episodeName.replace(" ", "_")
+			) + "&" + arguments;
 		}
 
 		return newUrl;

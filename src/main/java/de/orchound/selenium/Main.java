@@ -8,6 +8,7 @@ import org.openqa.selenium.WebDriver;
 import org.openqa.selenium.WebDriverException;
 import org.openqa.selenium.firefox.FirefoxDriver;
 
+import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
@@ -27,6 +28,7 @@ public class Main {
 	private static String cartoon;
 	private static String domain;
 	private static String quality;
+	private static String targetFile;
 	private static boolean testmode = false;
 
 	public static void main(String[] args) {
@@ -40,6 +42,7 @@ public class Main {
 			cartoon = args[args.length - 1];
 			domain = options.getOrDefault("domain", defaultDomain);
 			quality = options.getOrDefault("quality", defaultQuality);
+			targetFile = options.get("file");
 			testmode = options.containsKey("test");
 
 			getEpisodeLinks();
@@ -54,7 +57,6 @@ public class Main {
 		cartoonPage.open();
 		List<EpisodePage> episodes = cartoonPage.getEpisodes();
 
-		String cartoonTitle = cartoonPage.getTitle();
 		Collection<String> episodeLinks = Collections.emptyList();
 		try {
 			if (testmode)
@@ -67,11 +69,10 @@ public class Main {
 			webDriver.close();
 		}
 
-		try (FileWriter fileWriter = createFileWriter(cartoonTitle + ".txt")) {
-			fileWriter.write(String.join("\n", episodeLinks));
-		} catch (IOException ex) {
-			ex.printStackTrace();
-		}
+		episodeLinks.forEach(System.out::println);
+
+		if (targetFile != null && !targetFile.isEmpty())
+			writeLinksToFile(episodeLinks, new File(targetFile));
 	}
 
 	private static Collection<String> grabEpisodeLinks(Collection<EpisodePage> episodes) {
@@ -88,7 +89,7 @@ public class Main {
 					trials = 0;
 				} catch (PossibleCaptchaException ex) {
 					if (trials != 1)
-						waitForEnter();
+						waitForCaptcha();
 					else
 						episodeLinks.add("skipped episode: " + episode.getTitle());
 				} catch (UnsupportedServerException ex) {
@@ -112,17 +113,13 @@ public class Main {
 			episode.setQuality(quality);
 	}
 
-	private static FileWriter createFileWriter(String filename) {
-		FileWriter fileWriter;
-
-		try {
-			fileWriter = new FileWriter(filename);
+	private static void writeLinksToFile(Collection<String> links, File file) {
+		try (FileWriter writer = new FileWriter(file)) {
+			writer.write(String.join("\n", links));
 		} catch (IOException ex) {
 			ex.printStackTrace();
-			throw new IllegalArgumentException("could not open file: " + filename);
+			throw new RuntimeException("could not open file: " + file);
 		}
-
-		return fileWriter;
 	}
 
 	private static void printHelp() {
@@ -141,17 +138,21 @@ public class Main {
 			"-q=QUALITY    --quality",
 			"              Specifies the desired video quality.",
 			"              Defaults to 720p.",
+			"-f=FILE       --file",
+			"              Writes the links into the specified file.",
+			"              By default the links only get posted to stdout.",
 			"-t            --test",
 			"              Only grab the links for two episodes.",
 			"",
 			"Example:",
-			"java -jar KimCartoon-Linkgrabber.jar -t SpongeBob-SquarePants-Season-01",
+			"java -jar KimCartoon-Linkgrabber.jar -t -f=links.txt SpongeBob-SquarePants-Season-01",
+			"java -jar KimCartoon-Linkgrabber.jar -q=360p SpongeBob-SquarePants-Season-01 > links.txt",
 			""
 		));
 	}
 
-	private static void waitForEnter() {
-		System.out.println("waiting for enter");
+	private static void waitForCaptcha() {
+		System.out.println("Possible captcha detected. Continue by pressing the Enter key after solving it.");
 		try {
 			System.in.read();
 		} catch (IOException ex) {
@@ -176,6 +177,7 @@ public class Main {
 		shortCutMap.put("h", "help");
 		shortCutMap.put("d", "domain");
 		shortCutMap.put("q", "quality");
+		shortCutMap.put("f", "file");
 		shortCutMap.put("t", "test");
 
 		try {
