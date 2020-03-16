@@ -12,32 +12,42 @@ import java.io.FileWriter;
 import java.io.IOException;
 import java.util.*;
 import java.util.concurrent.TimeUnit;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
+import java.util.stream.Collectors;
+
 
 /**
  * Created by kevin on 06.05.16.
  */
 public class Main {
+	private static final String defaultDomain = "kimcartoon.to";
+
+	private static String cartoon;
+	private static String domain;
 	private static boolean testmode = false;
 
 	public static void main(String[] args) {
-		if (args.length > 0) {
-			if (args.length == 2) {
-				testmode = args[1].equals("test");
-				System.out.println("--- testmode ---");
-			}
+		Map<String, String> options = parseOptions(
+			Arrays.asList(args).subList(0, args.length - 1)
+		);
 
-			String cartoon = args[0];
-			getEpisodeLinks(cartoon);
-		} else {
+		if (options.containsKey("help")) {
 			printHelp();
+		} else {
+			cartoon = args[args.length - 1];
+			domain = options.getOrDefault("domain", defaultDomain);
+			testmode = options.containsKey("test");
+
+			getEpisodeLinks();
 		}
 	}
 
-	private static void getEpisodeLinks(String cartoon) {
+	private static void getEpisodeLinks() {
 		WebDriver webDriver = new FirefoxDriver();
 		webDriver.manage().timeouts().implicitlyWait(10, TimeUnit.SECONDS);
 
-		CartoonPage cartoonPage = new CartoonPage(webDriver, cartoon);
+		CartoonPage cartoonPage = new CartoonPage(webDriver, domain, cartoon);
 		cartoonPage.open();
 		List<EpisodePage> episodes = cartoonPage.getEpisodes();
 
@@ -72,6 +82,7 @@ public class Main {
 					episode.open();
 					prepareEpisodePage(episode);
 					episodeLinks.add(episode.getVideoLink());
+					trials = 0;
 				} catch (PossibleCaptchaException ex) {
 					if (trials != 1)
 						waitForEnter();
@@ -113,7 +124,22 @@ public class Main {
 	}
 
 	private static void printHelp() {
-		System.out.println("Provide the Cartoon name as command line parameter.");
+		System.out.println(String.join("\n",
+			"Usage:",
+			"java -jar KimCartoon-Linkgrabber.jar [OPTIONS] CARTOON",
+			"",
+			"CARTOON corresponds to x in the URL https://kimcartoon.to/Cartoon/x",
+			"",
+			"Options:",
+			"-h / --help        Print this help message.",
+			"-d / --domain      Specifies the KimCartoon domain.",
+			"                   Defaults to 'kimcartoon.to'",
+			"-t / --test        Only grab the links for two episodes.",
+			"",
+			"Example:",
+			"java -jar KimCartoon-Linkgrabber.jar -t SpongeBob-SquarePants-Season-01",
+			""
+		));
 	}
 
 	private static void waitForEnter() {
@@ -122,6 +148,37 @@ public class Main {
 			System.in.read();
 		} catch (IOException ex) {
 			throw new RuntimeException("IOException");
+		}
+	}
+
+	private static Map.Entry<String, String> argumentToTuple(String argument) {
+		Pattern pattern = Pattern.compile("-{1,2}(\\w)[\\w-]*(?:=([^\\s]+))*");
+		Matcher matcher = pattern.matcher(argument);
+		if (!matcher.matches())
+			throw new IllegalArgumentException();
+
+		String key = matcher.group(1);
+		String value = matcher.group(2);
+
+		return new AbstractMap.SimpleEntry<>(key, value);
+	}
+
+	private static Map<String, String> parseOptions(Collection<String> args) {
+		Map<String, String> shortCutMap = new HashMap<>();
+		shortCutMap.put("d", "domain");
+		shortCutMap.put("h", "help");
+		shortCutMap.put("t", "test");
+
+		try {
+			return args.stream().map(Main::argumentToTuple).map(x -> {
+				String key = shortCutMap.get(x.getKey());
+				if (key == null)
+					throw new IllegalArgumentException();
+				String value = x.getValue();
+				return new AbstractMap.SimpleEntry<>(key, value != null ? value : "");
+			}).collect(Collectors.toMap(AbstractMap.SimpleEntry::getKey, AbstractMap.SimpleEntry::getValue));
+		} catch (IllegalArgumentException ex) {
+			return Collections.singletonMap("help", null);
 		}
 	}
 }

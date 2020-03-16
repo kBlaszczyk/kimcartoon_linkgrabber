@@ -11,15 +11,15 @@ import java.util.stream.Collectors;
  * Created by kevin on 06.05.16.
  */
 public class CartoonPage extends Page {
-	private static String baseUrl = "https://kimcartoon.to/Cartoon/";
+	private static String baseUrl = "https://%s/Cartoon/";
 
 	private By byEpisodeListing = By.cssSelector("table.listing");
 	private By byEpisodeLinks = By.cssSelector("a[href^='/Cartoon/']");
 
 	private String title;
 
-	public CartoonPage(WebDriver webDriver, String cartoon) {
-		super(webDriver, baseUrl + cartoon);
+	public CartoonPage(WebDriver webDriver, String domain, String cartoon) {
+		super(webDriver, String.format(baseUrl, domain) + cartoon);
 		title = cartoon;
 	}
 
