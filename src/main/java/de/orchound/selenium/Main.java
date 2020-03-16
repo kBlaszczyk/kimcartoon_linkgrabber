@@ -22,9 +22,11 @@ import java.util.stream.Collectors;
  */
 public class Main {
 	private static final String defaultDomain = "kimcartoon.to";
+	private static final String defaultQuality = "720p";
 
 	private static String cartoon;
 	private static String domain;
+	private static String quality;
 	private static boolean testmode = false;
 
 	public static void main(String[] args) {
@@ -37,6 +39,7 @@ public class Main {
 		} else {
 			cartoon = args[args.length - 1];
 			domain = options.getOrDefault("domain", defaultDomain);
+			quality = options.getOrDefault("quality", defaultQuality);
 			testmode = options.containsKey("test");
 
 			getEpisodeLinks();
@@ -105,9 +108,8 @@ public class Main {
 		if (!server.isEmpty() && !server.equals("KimCartoon Beta"))
 			throw new UnsupportedServerException(server);
 		Set<String> qualityOptions = episode.getAvailableQualityOptions();
-		String targetQuality = "720p";
-		if (!episode.getQuality().equals(targetQuality) && qualityOptions.contains(targetQuality))
-			episode.setQuality(targetQuality);
+		if (!episode.getQuality().equals(quality) && qualityOptions.contains(quality))
+			episode.setQuality(quality);
 	}
 
 	private static FileWriter createFileWriter(String filename) {
@@ -131,10 +133,16 @@ public class Main {
 			"CARTOON corresponds to x in the URL https://kimcartoon.to/Cartoon/x",
 			"",
 			"Options:",
-			"-h / --help        Print this help message.",
-			"-d / --domain      Specifies the KimCartoon domain.",
-			"                   Defaults to 'kimcartoon.to'",
-			"-t / --test        Only grab the links for two episodes.",
+			"-h            --help",
+			"              Print this help message.",
+			"-d=DOMAIN     --domain",
+			"              Specifies the KimCartoon domain.",
+			"              Defaults to 'kimcartoon.to'.",
+			"-q=QUALITY    --quality",
+			"              Specifies the desired video quality.",
+			"              Defaults to 720p.",
+			"-t            --test",
+			"              Only grab the links for two episodes.",
 			"",
 			"Example:",
 			"java -jar KimCartoon-Linkgrabber.jar -t SpongeBob-SquarePants-Season-01",
@@ -165,8 +173,9 @@ public class Main {
 
 	private static Map<String, String> parseOptions(Collection<String> args) {
 		Map<String, String> shortCutMap = new HashMap<>();
-		shortCutMap.put("d", "domain");
 		shortCutMap.put("h", "help");
+		shortCutMap.put("d", "domain");
+		shortCutMap.put("q", "quality");
 		shortCutMap.put("t", "test");
 
 		try {
